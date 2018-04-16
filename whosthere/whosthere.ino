@@ -1,3 +1,7 @@
+// tutotial for our servo 
+// https://playground.arduino.cc/Learning/SingleServoExample
+
+
 void setup() {
   // put your setup code here, to run once:
 
