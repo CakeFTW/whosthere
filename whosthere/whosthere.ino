@@ -19,6 +19,7 @@ bool offCooldown = true;
 unsigned long knockCooldown = 0;
 unsigned long timeStamp = 0;
 unsigned long timer; 
+unsigned long lastUnlock = 0;
 
 
 class KnockMatchLock{
@@ -59,9 +60,12 @@ class KnockMatchLock{
       inputCounter = 0;
     }
     // check lid status
-    if(digitalRead(conPin) == 1){
+    if(digitalRead(conPin) == 1 && stamp > (lastUnlock + 5000) ){
       boxClosed = true;
-      lock();
+      if(!isLocked){
+        Serial.println("locking the box");
+        lock();
+      }
     }else{
       boxClosed = false;
     }
@@ -78,6 +82,7 @@ class KnockMatchLock{
     // if open and lid closed and no key has been recorded start the recording
     if (boxClosed && !keyRecorded){
       recording = true;
+
     }
     if(!recording){
       addIn(stamp);
@@ -139,6 +144,7 @@ class KnockMatchLock{
   void unlock(){
     isLocked = false;
     myServo.write(0);
+    lastUnlock = millis();
   }
 
   bool testMatch(){
@@ -155,6 +161,8 @@ class KnockMatchLock{
       }
     }
     if(matching){
+      unlock();
+      delay(500);
       reset();
       Serial.println("UNLOCKED!!!!!");
       
@@ -168,11 +176,10 @@ class KnockMatchLock{
     //resets all states to default and opens the lock
     *(this) = KnockMatchLock(precision); 
     unlock();
-    delay(250);
   }
 };
 
-KnockMatchLock lock = KnockMatchLock(150);
+KnockMatchLock lock = KnockMatchLock(75);
 
 void setup() {
   // put your setup code here, to run once:
